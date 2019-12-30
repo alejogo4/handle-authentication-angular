@@ -10,8 +10,11 @@ import {Router}  from '@angular/router';
 })
 export class AuthService {
   endpoint:string = "http://localhost:3000/api";
-  headers = new HttpHeaders().set('Content-Type','application/json');
-  currentUser = {};
+  headers = new HttpHeaders().set('Content-Type','application/json').set('Accept', 'application/json');
+  httpOptions= {
+    headers:this.headers
+  };
+  currentUser:any = {};
 
   constructor(private http:HttpClient, public router:Router) { }
 
@@ -28,13 +31,15 @@ export class AuthService {
   //LogIn
   signIn(user:User){
     let api =  `${this.endpoint}/login`;
-    return this.http.post<any>(api,user)
+    return this.http.post<any>(api,user,this.httpOptions)
     .subscribe((res:any)=>{
+        console.log(res);
         localStorage.setItem('access_token',res.token);
-        this.getUserProfile(res._id).subscribe((res)=>{
-          this.currentUser = res;
-          this.router.navigate(['user-profile/'+res.msg._id]);
-        })
+        this.currentUser = res.signed_user;
+        this.router.navigate(['user-profile/'+this.currentUser.id]);
+        /*this.getUserProfile(res._id).subscribe((res)=>{
+          
+        })*/
     })
   }
 
